@@ -2,7 +2,7 @@
 title: "Flickering issue with Indexed Indirect Draw"
 seoTitle: "Resolving Indexed Indirect Draw Flickering"
 seoDescription: "Resolve flickering in Indexed Indirect Draw by identifying and fixing buffer alignment issues between CPU and GPU using manual padding"
-datePublished: Tue Jan 20 2026 02:33:33 GMT+0000 (Coordinated Universal Time)
+datePublished: 2026-01-20T02:33:33.538Z
 cuid: cmklzcfvm000702l86iulbu8q
 slug: flickering-issue-with-indexed-indirect-draw
 tags: nvidia, unreal-engine, gpu
@@ -31,20 +31,20 @@ struct FData {
 };
 ```
 
-On the CPU (C++), this might look like a continuous block of 80 bytes. But on the GPU (NVIDIA specifically), a `float4` isn't just four floats—it is a **16-byte vector entity**.
+The structure is 92 bytes in total.
 
-If the members preceding it don't add up to a perfect multiple of 16, the HLSL compiler "pushes" that `float4` to the next 16-byte boundary to keep the hardware happy. This creates **hidden padding** that your C++ code doesn't know about.
+And according to google, it seems that (for NVIDIA specifically), a `float4` isn't just four floats—it is a **16-byte vector entity**.
 
-**The result?** The CPU uploads 80 bytes, but the GPU expects 96. Every element in your buffer after the first one is "shifted" by 16 bytes. To the GPU, your data looks like static or garbage, causing the infamous **flicker**.
+And this seems to be the root cause that some of the instance buffer will read "invalid data".
 
 **The Fix: Manual Padding is Your Friend**
 
-We discovered that Unreal Engine doesn't "assert" or warn you about this. Why? Because the C++ compiler and the Shader compiler are two different worlds. They don't talk to each other.
+In fact, in latest [Unreal Engine](https://github.com/EpicGames/UnrealEngine/blob/0b917fe1ab67ca45e1233a866c92e791fc451ef8/Engine/Source/Runtime/D3D12RHI/Private/D3D12Buffer.cpp#L420) (5.7), they add a new variable "RHI\_RAW\_VIEW\_ALIGNMENT" to check if your structured buffer stride is `LeastCommonMultiplier` of it while creating the buffer.
 
-To fix it, we had to take control of the layout. By adding a simple `float Padding;` after our `int Payload;`, we manually aligned the `float4` to the 16-byte boundary. Suddenly, the CPU and GPU were speaking the same language.
+So for my case, to fix it, we had to add a simple `float Padding;` after our `int Payload;`, we manually aligned to the 16-byte boundary. And then the flickering issue goes away.
 
 **The ByteAddressBuffer Escape Hatch**
 
-If you’re tired of fighting with alignment, there is the **ByteAddressBuffer**. It treats memory as raw bytes, skipping the "smart" auto-padding of Structured Buffers. It's more manual, but it's the ultimate way to ensure what you send is exactly what you get.
+And some search result shows there's other work around for this, but I didn't test it.
 
-In long run, I may optimize the buffer structure without using either float4 and padding.
+If you’re tired of fighting with alignment, there is the **ByteAddressBuffer**. It treats memory as raw bytes, skipping the "smart" auto-padding of Structured Buffers. It's more manual, but it's the ultimate way to ensure what you send is exactly what you get.
