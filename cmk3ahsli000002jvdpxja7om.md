@@ -2,7 +2,7 @@
 title: "An issue with indexed indirect draw in Unreal"
 seoTitle: "Unreal Indexed Indirect Draw Issue"
 seoDescription: "Troubleshoot an Unreal indexed indirect draw shader issue due to VS-To-PS struct mismatch and compiler bugs, and AI's role in debugging"
-datePublished: Wed Jan 07 2026 00:38:01 GMT+0000 (Coordinated Universal Time)
+datePublished: 2026-01-07T00:38:01.734Z
 cuid: cmk3ahsli000002jvdpxja7om
 slug: an-issue-with-indexed-indirect-draw-in-unreal
 tags: unreal-engine, shader
