@@ -2,7 +2,7 @@
 title: "Check your MSVC version if you having errors when using new feature in C++ 20"
 seoTitle: "error C2039"
 seoDescription: "error C2039: 'format_string': is not a member of 'std'"
-datePublished: Thu Jun 29 2023 02:28:38 GMT+0000 (Coordinated Universal Time)
+datePublished: 2023-06-29T02:28:38.553Z
 cuid: cljgj0s9l000609jw16ipau10
 slug: check-your-msvc-version-if-you-having-errors-when-using-new-feature-in-c-20
 tags: cpp, c2039
